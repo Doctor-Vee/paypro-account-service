@@ -15,4 +15,10 @@ public class RestApiControllerAdvice {
         log.info("Exception: {}", exception.getStackTrace());
         return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = UnauthorisedAccessException.class)
+    public ResponseEntity handleUnauthorisedAccessException(UnauthorisedAccessException exception){
+        log.info("Exception: {}", exception.getStackTrace());
+        return new ResponseEntity(exception.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
 }

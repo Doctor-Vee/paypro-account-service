@@ -23,12 +23,14 @@ public class AuthenticatedUserDetails implements UserDetails {
 
     private String phoneNumber;
 
+    private String accountNumber;
+
     @JsonIgnore
     private String password;
 
 
     public static AuthenticatedUserDetails build(User user) {
-        return new AuthenticatedUserDetails(user.getId(), user.getUsername(), user.getEmail(), user.getPhoneNumber(), user.getPassword());
+        return new AuthenticatedUserDetails(user.getId(), user.getUsername(), user.getEmail(), user.getPhoneNumber(), user.getAccountNumber(), user.getPassword());
     }
 
 
