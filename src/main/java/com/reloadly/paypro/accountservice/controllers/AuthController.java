@@ -1,6 +1,8 @@
 package com.reloadly.paypro.accountservice.controllers;
 
+import com.reloadly.paypro.accountservice.payload.request.LoginRequest;
 import com.reloadly.paypro.accountservice.payload.request.SignupRequest;
+import com.reloadly.paypro.accountservice.payload.response.LoginResponse;
 import com.reloadly.paypro.accountservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest){
         String response = authService.processSignup(signupRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> authenticateUser(@RequestBody LoginRequest loginRequest){
+        LoginResponse response = authService.processLogin(loginRequest);
         return ResponseEntity.ok(response);
     }
 

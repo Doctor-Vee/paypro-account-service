@@ -6,8 +6,14 @@ import com.reloadly.paypro.accountservice.payload.request.SignupRequest;
 import com.reloadly.paypro.accountservice.payload.response.LoginResponse;
 import com.reloadly.paypro.accountservice.persistence.model.User;
 import com.reloadly.paypro.accountservice.persistence.repository.UserRepository;
+import com.reloadly.paypro.accountservice.security.AuthenticatedUserDetails;
+import com.reloadly.paypro.accountservice.security.JwtUtils;
 import com.reloadly.paypro.accountservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,10 +27,16 @@ import java.math.BigDecimal;
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
 
     @Override
@@ -50,6 +62,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse processLogin(LoginRequest loginRequest) {
-        return null;
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        return new LoginResponse(jwt);
     }
 }
