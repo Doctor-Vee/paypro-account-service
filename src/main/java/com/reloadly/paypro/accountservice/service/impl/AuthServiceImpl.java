@@ -55,7 +55,11 @@ public class AuthServiceImpl implements AuthService {
 
         String accountNumber = "000" + RandomStringUtils.randomNumeric(7);
 
-        User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), passwordEncoder.encode(signupRequest.getPassword()), signupRequest.getPhoneNumber(), accountNumber, BigDecimal.ZERO);
+        while(userRepository.existsByAccountNumber(accountNumber)){
+            accountNumber = "000" + RandomStringUtils.randomNumeric(7);
+        }
+
+        User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), passwordEncoder.encode(signupRequest.getPassword()), signupRequest.getPhoneNumber(), accountNumber, new BigDecimal(10000));
         userRepository.save(user);
         return "Congratulations, your account number is " + accountNumber;
     }
