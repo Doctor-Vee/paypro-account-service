@@ -1,26 +1,27 @@
 package com.reloadly.paypro.accountservice.service.impl;
 
+import com.reloadly.paypro.accountservice.constant.EventTopicConstant;
 import com.reloadly.paypro.accountservice.exceptions.BadRequestException;
+import com.reloadly.paypro.accountservice.messaging.EventManager;
+import com.reloadly.paypro.accountservice.payload.event.UserCreationEvent;
 import com.reloadly.paypro.accountservice.payload.request.LoginRequest;
 import com.reloadly.paypro.accountservice.payload.request.SignupRequest;
 import com.reloadly.paypro.accountservice.payload.response.LoginResponse;
 import com.reloadly.paypro.accountservice.persistence.model.User;
 import com.reloadly.paypro.accountservice.persistence.repository.UserRepository;
-import com.reloadly.paypro.accountservice.security.AuthenticatedUserDetails;
 import com.reloadly.paypro.accountservice.security.JwtUtils;
 import com.reloadly.paypro.accountservice.service.AuthService;
+import com.reloadly.paypro.accountservice.utils.JsonUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-
-import java.math.BigDecimal;
 
 @Repository
 @Service
@@ -37,6 +38,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    EventManager eventManager;
 
 
     @Override
@@ -55,12 +59,15 @@ public class AuthServiceImpl implements AuthService {
 
         String accountNumber = "000" + RandomStringUtils.randomNumeric(7);
 
-        while(userRepository.existsByAccountNumber(accountNumber)){
+        while (userRepository.existsByAccountNumber(accountNumber)) {
             accountNumber = "000" + RandomStringUtils.randomNumeric(7);
         }
 
-        User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), passwordEncoder.encode(signupRequest.getPassword()), signupRequest.getPhoneNumber(), accountNumber, new BigDecimal(10000));
+        User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), passwordEncoder.encode(signupRequest.getPassword()), signupRequest.getPhoneNumber(), accountNumber);
         userRepository.save(user);
+        UserCreationEvent userCreationEvent = new UserCreationEvent(user.getEmail(), user.getUsername(), user.getPhoneNumber(), user.getAccountNumber());
+        String userCreationEventString = JsonUtil.toJsonString(userCreationEvent);
+        eventManager.publishEvent(EventTopicConstant.USER_CREATION, userCreationEventString);
         return "Congratulations, your account number is " + accountNumber;
     }
 
