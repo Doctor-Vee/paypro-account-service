@@ -2,6 +2,7 @@ package com.reloadly.paypro.accountservice.service.impl;
 
 import com.reloadly.paypro.accountservice.constant.EventTopicConstant;
 import com.reloadly.paypro.accountservice.exceptions.BadRequestException;
+import com.reloadly.paypro.accountservice.exceptions.UnauthorisedAccessException;
 import com.reloadly.paypro.accountservice.messaging.EventManager;
 import com.reloadly.paypro.accountservice.payload.event.UserCreationEvent;
 import com.reloadly.paypro.accountservice.payload.request.LoginRequest;
@@ -57,11 +58,7 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByPhoneNumber(signupRequest.getPhoneNumber()))
             throw new BadRequestException("Error: Sorry ... this phone number has already been registered here");
 
-        String accountNumber = "000" + RandomStringUtils.randomNumeric(7);
-
-        while (userRepository.existsByAccountNumber(accountNumber)) {
-            accountNumber = "000" + RandomStringUtils.randomNumeric(7);
-        }
+        String accountNumber = signupRequest.getPhoneNumber().substring(1);
 
         User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), passwordEncoder.encode(signupRequest.getPassword()), signupRequest.getPhoneNumber(), accountNumber);
         userRepository.save(user);
@@ -73,10 +70,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse processLogin(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        return new LoginResponse(jwt);
+        if (ObjectUtils.isEmpty(loginRequest.getUsername()) || ObjectUtils.isEmpty(loginRequest.getPassword())) {
+            throw new BadRequestException("Missing required details");
+        }
+        LoginResponse response = new LoginResponse();
+        try{
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            System.out.println(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            response = new LoginResponse(jwt);
+        } catch (Exception e){
+            throw new UnauthorisedAccessException("Invalid username or password");
+        }
+        return response;
     }
 }
