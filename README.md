@@ -2,7 +2,7 @@
 Account Microservice for the PayPro App
 
 This is microservice works hand in hand with two other microservices which are:
-- [PayPro Transaction Service](https://github.com/Victor-Chinewubeze/paypro-transaction-service "PayPro Transacction Service")
+- [PayPro Transaction Service](https://github.com/Victor-Chinewubeze/paypro-transaction-service "PayPro Transaction Service")
 - [PayPro Notification Service](https://github.com/Victor-Chinewubeze/paypro-notification-service "PayPro Notification Service")
 
 ## Technologies Used
@@ -15,3 +15,4 @@ This is microservice works hand in hand with two other microservices which are:
 - Set up PostgreSQL databases for each of them and add your database configuration to the two application.properties files found in the config folder and resources folder.
 - Start up your Kafka server
 - Start the application
+The application should start running on PORT 7500
