@@ -1,7 +1,7 @@
 # PayPro Account Service
 Account Microservice for the PayPro App
 
-This is microservice works hand in hand with two other microservices which are:
+This microservice works hand in hand with two other microservices which are:
 - [PayPro Transaction Service](https://github.com/Victor-Chinewubeze/paypro-transaction-service "PayPro Transaction Service")
 - [PayPro Notification Service](https://github.com/Victor-Chinewubeze/paypro-notification-service "PayPro Notification Service")
 
